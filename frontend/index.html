@@ -1,28 +1,77 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>LurkForWork</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- You can add your styles and scripts here -->
-    <link rel="stylesheet" type="text/css" media="screen" href="styles/provided.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
 </head>
+
 <body>
-    <!-- This is an example app structure, you can modify this as much as you choose --> 
-    <header>
+    <!-- This is an example app structure, you can modify this as much as you choose -->
+    <!-- <header>
         <h1>lurkforwork.com</h1>
         <nav>
             <li class="nav-item">Item</li>
             <li class="nav-item">Item</li>
         </nav>
-    </header>
+    </header> -->
+
     <main role="main">
-        <!-- app goes here --> 
+        <div id="login-page">
+            <form id="login-form" onsubmit="return false;">
+                <table>
+                    <tr>
+                        <td><label for="email-login">email</label></td>
+                        <td><input type="text" name="email-login" id="email-login"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="password-login">password</label></td>
+                        <td><input type="text" name="password-login" id="password-login"></td>
+                    </tr>
+                </table>
+                <button id="to-register-page">Register</button>
+                <input id="login-button" type="submit" value="Login">
+            </form>
+        </div>
+
+        <div id="register-page" class="hide">
+            <form id="login-form" onsubmit="return false;">
+                <table>
+                    <tr>
+                        <td><label for="email-register">email</label></td>
+                        <td><input type="text" name="email-register" id="email-register"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="name-register">name</label></td>
+                        <td><input type="text" name="name-register" id="name-register"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="password-register">password</label></td>
+                        <td><input type="text" name="password-register" id="password-register"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="confirm-password">confirm password</label></td>
+                        <td><input type="text" name="confirm-password" id="confirm-password"></td>
+                    </tr>
+                </table>
+                <input id="register-button" type="submit" value="Register">
+            </form>
+        </div>
+
+        <div id="home-page" class="hide">
+            <h1>This is home page</h1>
+        </div>
+
     </main>
-    <footer>
+
+    <!-- <footer>
         <p>&copy; lurkforwork.com 2022</p>
-    </footer>
+    </footer> -->
     <script type="module" src="src/main.js"></script>
 </body>
+
 </html>
