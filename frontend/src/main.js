@@ -10,6 +10,11 @@ const swapPage = (currPage, newPage) => {
     document.getElementById(newPage).classList.remove('hide');
 }
 
+const displayHomePage = () => {
+    swapPage('logged-out', 'logged-in');
+    feedJobs();
+}
+
 const serviceCall = (path, data, method) => {
     const options = {
         method: method,
@@ -23,13 +28,12 @@ const serviceCall = (path, data, method) => {
     }
     return new Promise((resolve, reject) => {
         fetch(`http://localhost:${BACKEND_PORT}${path}`, options)
-            .then(response => {
-                if (response.ok) {
-                    return response.json().then(resolve);
-                } else if (response.status === 400 || response.status === 403) {
-                    return response.json().then(reject);
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errPopup(data.error);
                 } else {
-                    throw new Error(`${response.status} Error with API call`);
+                    resolve(data);
                 }
             });
     });
@@ -53,24 +57,21 @@ const errPopup = (errMsg) => {
     errDiv.appendChild(newDiv);
 }
 
-// TODO: need an error popup function to replace alert() 
-
 // -------------------- login page --------------------
 
 document.getElementById('login-button').addEventListener('click', () => {
-    const email = document.getElementById('email-login');
-    const password = document.getElementById('password-login');
+    let data = {
+        email: document.getElementById('email-login').value,
+        password: document.getElementById('password-login').value
+    }
 
-    serviceCall('/auth/login', { email: email.value, password: password.value }, 'POST')
+    serviceCall('/auth/login', data, 'POST')
         .then(res => {
             localStorage.setItem('token', res.token);
             userId = res.userId;
 
-            swapPage('logged-out', 'logged-in');
+            displayHomePage();
         })
-        .catch(err => {
-            errPopup(err.error);
-        });
 });
 
 document.getElementById('to-register-page').addEventListener('click', () => {
@@ -80,35 +81,36 @@ document.getElementById('to-register-page').addEventListener('click', () => {
 // -------------------- register page --------------------
 
 document.getElementById('register-button').addEventListener('click', () => {
-    const email = document.getElementById('email-register');
-    const name = document.getElementById('name-register');
-    const password = document.getElementById('password-register');
-    const confirmPwd = document.getElementById('confirm-password');
+    let data = {
+        email: document.getElementById('email-register').value,
+        password: document.getElementById('password-register').value,
+        name: document.getElementById('name-register').value
+    }
 
-    if (!email.value) {
+    if (!data.email) {
         errPopup("email cannot be empty.");
         return;
-    } else if (!name.value) {
+    } else if (!data.name) {
         errPopup("Name cannot be empty.");
         return;
-    } else if (!password.value) {
+    } else if (!data.password) {
         errPopup("Password cannot be empty.");
         return;
-    } else if (password.value !== confirmPwd.value) {
+    } else if (data.password !== document.getElementById('confirm-password').value) {
         errPopup("Passwords do not match.");
+        return;
+    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(data.email)) {
+        errPopup("Email format is not valid.");
         return;
     }
 
-    serviceCall('/auth/register', { email: email.value, password: password.value, name: name.value }, 'POST')
+    serviceCall('/auth/register', data, 'POST')
         .then(res => {
             localStorage.setItem('token', res.token);
             userId = res.userId;
 
             swapPage('logged-out', 'logged-in');
         })
-        .catch(err => {
-            errPopup(err.error);
-        });
 });
 
 document.getElementById('to-login-page').addEventListener('click', () => {
@@ -116,16 +118,86 @@ document.getElementById('to-login-page').addEventListener('click', () => {
 });
 
 // -------------------- home page --------------------
-if (localStorage.getItem('token')) {
-    swapPage('logged-out', 'logged-in');
-}
 
 document.getElementById('logout-button').addEventListener('click', () => {
     localStorage.removeItem('token');
     userId = 0;
+    // reset jobs div
+    const jobsDiv = document.getElementById('jobs');
+    while (jobsDiv.firstChild) {
+        jobsDiv.removeChild(jobsDiv.lastChild);
+    }
+
     swapPage('logged-in', 'logged-out');
 })
 
 // -------------------- job --------------------
 
+const timeToStr = (datetime) => {
+    const time = new Date(datetime);
+    return `${time.getDate()}/${time.getMonth() + 1}/${time.getFullYear()}`;
+}
 
+const timeCreated = (datetime) => {
+    const time = new Date(datetime);
+    const diffMinutes = (Date.now - time) / 1000 / 60;
+    if (diffMinutes <=  60 * 24) {
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = Math.floor(diff - hours * 60);
+        return `${hours} hours and ${minutes} minutes ago`;
+    } else {
+        return timeToStr(datetime);
+    }
+}
+
+const feedJobs = () => {
+    serviceCall('/job/feed?start=0', {}, 'GET')
+    .then(res => {
+        for (const job of res) {
+            const jobDiv = document.createElement('div');
+            jobDiv.style.width = '300px';
+            jobDiv.style.border = '1px solid blue';
+            jobDiv.style.margin = '20px';
+            jobDiv.style.padding = '10px';
+
+            const img = document.createElement('img');
+            img.src = job.image;
+            jobDiv.appendChild(img);
+
+            const title = document.createElement('span');
+            title.innerText = `${job.title}\n`;
+            title.style.marginLeft = '10px';
+            jobDiv.appendChild(title);
+
+            const creatorInfo = document.createElement('div');
+            creatorInfo.style.color = 'grey';
+            creatorInfo.innerText = `created by ${job.creatorId} ${timeCreated(job.createdAt)}`;
+            jobDiv.appendChild(creatorInfo);
+
+            const startTime = document.createElement('div');
+            startTime.innerText = `started from ${timeToStr(job.start)}`;
+            jobDiv.appendChild(startTime);
+
+            const description = document.createElement('div');
+            description.innerText = job.description;
+            jobDiv.appendChild(description);
+
+            const likes = document.createElement('span');
+            likes.innerText = `${job.likes.length} likes`;
+            jobDiv.appendChild(likes);
+
+            const comments = document.createElement('span');
+            comments.innerText = `${job.comments.length} comments`;
+            comments.style.marginLeft = '100px';
+            jobDiv.appendChild(comments);
+
+            document.getElementById('jobs').appendChild(jobDiv);
+        }
+    });
+}
+
+// -------------------- Main --------------------
+// Must be at the bottom
+if (localStorage.getItem('token')) {
+    displayHomePage();
+}
