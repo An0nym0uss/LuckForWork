@@ -2,9 +2,9 @@ import { BACKEND_PORT } from './config.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
 
-let userId;
 
 // -------------------- helper --------------------
+
 const swapPage = (currPage, newPage) => {
     document.getElementById(currPage).classList.add('hide');
     document.getElementById(newPage).classList.remove('hide');
@@ -39,22 +39,62 @@ const serviceCall = (path, data, method) => {
     });
 }
 
-const errPopup = (errMsg) => {
-    const errDiv = document.getElementById('error-div');
+const css = (element, styles) => {
+    for (const property in styles) {
+        element.style[property] = styles[property];
+    }
+}
+
+const popup = (content) => {
     const newDiv = document.createElement('div');
-    const container = document.createElement('span');
-    const err = document.createTextNode(`ERROR: ${errMsg} `);
-    container.style.color = "red";
-    container.appendChild(err);
-    const closeBtn = document.createElement('button');
-    closeBtn.innerText = "close";
-    closeBtn.addEventListener('click', () => {
-        errDiv.removeChild(newDiv);
+    css(newDiv, {
+        display: 'block',
+        position: 'fixed',
+        zIndex: '1',
+        left: '0',
+        top: '0',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto',
+        backgroundColor: 'rgba(0,0,0,0.4)',
     });
 
+    const container = document.createElement('div');
+    css(container, {
+        backgroundColor: 'white',
+        margin: '25% auto',
+        padding: '20px',
+        border: '1px solid grey',
+        borderRadius: '10px',
+        width: '70%'
+    });
+
+    content.style.marginBottom = '20px';
+    container.appendChild(content);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = "close";
+    css(closeBtn, {
+        position: 'relative',
+        left: '85%'
+    });
+    closeBtn.addEventListener('click', () => {
+        newDiv.parentNode.removeChild(newDiv);
+    });
+    container.appendChild(closeBtn);
+
     newDiv.appendChild(container);
-    newDiv.appendChild(closeBtn);
-    errDiv.appendChild(newDiv);
+
+    return newDiv;
+}
+
+const errPopup = (errMsg) => {
+    const errDiv = document.getElementById('error-div');
+
+    const err = document.createElement('div');
+    err.innerText = `ERROR: ${errMsg}`;
+
+    errDiv.appendChild(popup(err));
 }
 
 // -------------------- login page --------------------
@@ -68,7 +108,7 @@ document.getElementById('login-button').addEventListener('click', () => {
     serviceCall('/auth/login', data, 'POST')
         .then(res => {
             localStorage.setItem('token', res.token);
-            userId = res.userId;
+            localStorage.setItem('userId', res.userId);
 
             displayHomePage();
         })
@@ -107,7 +147,7 @@ document.getElementById('register-button').addEventListener('click', () => {
     serviceCall('/auth/register', data, 'POST')
         .then(res => {
             localStorage.setItem('token', res.token);
-            userId = res.userId;
+            localStorage.setItem('userId', res.userId);
 
             displayHomePage();
         })
@@ -121,7 +161,7 @@ document.getElementById('to-login-page').addEventListener('click', () => {
 
 document.getElementById('logout-button').addEventListener('click', () => {
     localStorage.removeItem('token');
-    userId = 0;
+    localStorage.removeItem('userId');
     // reset jobs div
     const jobsDiv = document.getElementById('jobs');
     while (jobsDiv.firstChild) {
@@ -158,6 +198,7 @@ const feedJobs = () => {
                     .then(creator => {
 
                         const jobDiv = document.createElement('div');
+                        jobDiv.id = `job-${job.id}`;
                         jobDiv.style.width = '300px';
                         jobDiv.style.border = '1px solid blue';
                         jobDiv.style.margin = '20px';
@@ -186,19 +227,93 @@ const feedJobs = () => {
                         description.innerText = job.description;
                         jobDiv.appendChild(description);
 
-                        const likes = document.createElement('span');
-                        likes.innerText = `${job.likes.length} likes`;
-                        jobDiv.appendChild(likes);
+                        jobDiv.appendChild(likeJobBtn(job.id, job.likes));
+
+                        const numLikes = document.createElement('span');
+                        numLikes.innerText = ` ${job.likes.length} `;
+                        jobDiv.appendChild(numLikes);
+
+                        const likesDiv = document.createElement('div');
+                        likesDiv.id = `likes-${job.id}`;
+                        likesDiv.style.display = 'inline-block';
+                        jobDiv.appendChild(likesDiv);
+                        jobDiv.appendChild(showLikes(likesDiv.id, job.likes));
 
                         const comments = document.createElement('span');
                         comments.innerText = `${job.comments.length} comments`;
-                        comments.style.marginLeft = '100px';
+                        comments.style.marginLeft = '40px';
                         jobDiv.appendChild(comments);
 
                         document.getElementById('jobs').appendChild(jobDiv);
                     });
             }
         });
+}
+
+const likeJobBtn = (jobId, likes) => {
+    const button = document.createElement('button');
+    button.style.width = '50px';
+
+    let isLiked = false;
+    for (const likedUser of likes) {
+        if (likedUser.userId == localStorage.getItem('userId')) {
+            isLiked = true;
+            break;
+        }
+    }
+    if (isLiked) {
+        button.innerText = 'unlike';
+    } else {
+        button.innerText = 'like';
+    }
+
+    button.addEventListener('click', () => {
+        if (button.innerText === 'like') {
+            serviceCall(`/job/like`, { id: jobId, turnon: true }, 'PUT')
+            button.innerText = 'unlike';
+        } else {
+            serviceCall(`/job/like`, { id: jobId, turnon: false }, 'PUT')
+            button.innerText = 'like';
+        }
+    });
+
+    return button;
+}
+
+const showLikes = (id, likes) => {
+    const likesSpan = document.createElement('span');
+    likesSpan.innerText = `likes`;
+    css(likesSpan, {
+        color: 'blue',
+        textDecoration: 'underline',
+        cursor: 'pointer'
+    });
+
+    likesSpan.addEventListener('mouseover', () => {
+        likesSpan.style.opacity = 0.5;
+    });
+
+    likesSpan.addEventListener('mouseout', () => {
+        likesSpan.style.opacity = 1;
+    });
+
+    likesSpan.addEventListener('click', () => {
+        const likesDiv = document.getElementById(id);
+
+        const likesList = document.createElement('div');
+        const title = document.createElement('h3');
+        title.textContent = 'Liked users:';
+        likesList.appendChild(title);
+        for (const user of likes) {
+            const userDiv = document.createElement('div');
+            userDiv.innerText = user.userName;
+            likesList.appendChild(userDiv);
+        }
+
+        likesDiv.appendChild(popup(likesList));
+    });
+
+    return likesSpan;
 }
 
 // -------------------- Main --------------------
