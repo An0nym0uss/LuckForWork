@@ -109,7 +109,7 @@ document.getElementById('register-button').addEventListener('click', () => {
             localStorage.setItem('token', res.token);
             userId = res.userId;
 
-            swapPage('logged-out', 'logged-in');
+            displayHomePage();
         })
 });
 
@@ -141,7 +141,7 @@ const timeToStr = (datetime) => {
 const timeCreated = (datetime) => {
     const time = new Date(datetime);
     const diffMinutes = (Date.now - time) / 1000 / 60;
-    if (diffMinutes <=  60 * 24) {
+    if (diffMinutes <= 60 * 24) {
         const hours = Math.floor(diffMinutes / 60);
         const minutes = Math.floor(diff - hours * 60);
         return `${hours} hours and ${minutes} minutes ago`;
@@ -152,48 +152,53 @@ const timeCreated = (datetime) => {
 
 const feedJobs = () => {
     serviceCall('/job/feed?start=0', {}, 'GET')
-    .then(res => {
-        for (const job of res) {
-            const jobDiv = document.createElement('div');
-            jobDiv.style.width = '300px';
-            jobDiv.style.border = '1px solid blue';
-            jobDiv.style.margin = '20px';
-            jobDiv.style.padding = '10px';
+        .then(jobs => {
+            for (const job of jobs) {
+                serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
+                    .then(creator => {
 
-            const img = document.createElement('img');
-            img.src = job.image;
-            jobDiv.appendChild(img);
+                        const jobDiv = document.createElement('div');
+                        jobDiv.style.width = '300px';
+                        jobDiv.style.border = '1px solid blue';
+                        jobDiv.style.margin = '20px';
+                        jobDiv.style.padding = '10px';
 
-            const title = document.createElement('span');
-            title.innerText = `${job.title}\n`;
-            title.style.marginLeft = '10px';
-            jobDiv.appendChild(title);
+                        const img = document.createElement('img');
+                        img.src = job.image;
+                        jobDiv.appendChild(img);
 
-            const creatorInfo = document.createElement('div');
-            creatorInfo.style.color = 'grey';
-            creatorInfo.innerText = `created by ${job.creatorId} ${timeCreated(job.createdAt)}`;
-            jobDiv.appendChild(creatorInfo);
+                        const title = document.createElement('span');
+                        title.innerText = `${job.title}\n`;
+                        title.style.marginLeft = '10px';
+                        jobDiv.appendChild(title);
 
-            const startTime = document.createElement('div');
-            startTime.innerText = `started from ${timeToStr(job.start)}`;
-            jobDiv.appendChild(startTime);
 
-            const description = document.createElement('div');
-            description.innerText = job.description;
-            jobDiv.appendChild(description);
+                        const creatorInfo = document.createElement('div');
+                        creatorInfo.style.color = 'grey';
+                        creatorInfo.innerText = `created by ${creator.name} ${timeCreated(job.createdAt)}`;
+                        jobDiv.appendChild(creatorInfo);
 
-            const likes = document.createElement('span');
-            likes.innerText = `${job.likes.length} likes`;
-            jobDiv.appendChild(likes);
+                        const startTime = document.createElement('div');
+                        startTime.innerText = `started from ${timeToStr(job.start)}`;
+                        jobDiv.appendChild(startTime);
 
-            const comments = document.createElement('span');
-            comments.innerText = `${job.comments.length} comments`;
-            comments.style.marginLeft = '100px';
-            jobDiv.appendChild(comments);
+                        const description = document.createElement('div');
+                        description.innerText = job.description;
+                        jobDiv.appendChild(description);
 
-            document.getElementById('jobs').appendChild(jobDiv);
-        }
-    });
+                        const likes = document.createElement('span');
+                        likes.innerText = `${job.likes.length} likes`;
+                        jobDiv.appendChild(likes);
+
+                        const comments = document.createElement('span');
+                        comments.innerText = `${job.comments.length} comments`;
+                        comments.style.marginLeft = '100px';
+                        jobDiv.appendChild(comments);
+
+                        document.getElementById('jobs').appendChild(jobDiv);
+                    });
+            }
+        });
 }
 
 // -------------------- Main --------------------
