@@ -24,7 +24,7 @@
         <div id="error-div"></div>
 
         <secton id="logged-out">
-            <div id="login-page">
+            <div id="login-page" class="center">
                 <table>
                     <tr>
                         <td><label for="email-login">email</label></td>
@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            <div id="register-page" class="hide">
+            <div id="register-page" class="hide center">
                 <table>
                     <tr>
                         <td><label for="email-register">email</label></td>
@@ -72,18 +72,21 @@
             </div>
         </secton>
 
-        <section id="logged-in" class="hide">
+        <section id="logged-in" class="hide center">
             <div id="home-page">
                 <h1>This is home page</h1>
             </div>
-            <div style="position: absolute; right: 10px">
-                <button id="logout-button">Logout</button>
-            </div>
-            <div id="jobs"></div>
             
+            <button id="logout-button" class="logout-btn">Logout</button>
+
+            <div id="jobs"></div>
+            <button id="load-jobs-btn">Load more job posts</button>
+
         </section>
 
     </main>
+
+    <div style="height: 100px"></div>
 
     <!-- <footer>
         <p>&copy; lurkforwork.com 2022</p>

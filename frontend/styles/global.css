@@ -1,11 +1,45 @@
 /* base styles, feel free to edit */
-html, body {
+body {
     margin: 0;
     padding: 0;
-    height: 100%;
     font-family: Arial;
 }
 
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .hide {
-    display: none;   
+    display: none;
+}
+
+.logout-btn {
+    position: fixed;
+    top: 6%;
+    right: 10%;
+}
+
+.job-container {
+    width: 300px;
+    border: 1px solid blue;
+    margin: 20px;
+    padding: 10px;
+}
+
+@media (max-width: 560px) {
+    .job-container {
+        width: 200px;
+    }
+}
+
+@media (min-width: 900px) {
+    .job-container {
+        width: 350px;
+    }
+
+    .logout-btn {
+        right: 20%;
+    }
 }

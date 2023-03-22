@@ -173,6 +173,8 @@ document.getElementById('logout-button').addEventListener('click', () => {
 
 // -------------------- job --------------------
 
+let start = 0;
+
 const timeToStr = (datetime) => {
     const time = new Date(datetime);
     return `${time.getDate()}/${time.getMonth() + 1}/${time.getFullYear()}`;
@@ -190,19 +192,42 @@ const timeCreated = (datetime) => {
     }
 }
 
+document.getElementById('load-jobs-btn').addEventListener('click', () => {
+    feedJobs();
+});
+
+let shouldLoad = true;
+window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        const jobsDiv = document.getElementById('jobs');
+        if (shouldLoad) {
+            const loading = document.createElement('h2');
+            loading.innerText = 'Loading...';
+            jobsDiv.appendChild(loading);
+
+            const prev = start;
+            shouldLoad = false;
+            setTimeout(() => {
+                feedJobs();
+                jobsDiv.removeChild(loading);
+                shouldLoad = true;
+            }, 500);
+        }
+    }
+});
+
 const feedJobs = () => {
-    serviceCall('/job/feed?start=0', {}, 'GET')
+    serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
+            console.log(jobs);
+            start += jobs.length;
+            console.log(start);
             for (const job of jobs) {
                 serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
                     .then(creator => {
 
                         const jobDiv = document.createElement('div');
-                        jobDiv.id = `job-${job.id}`;
-                        jobDiv.style.width = '300px';
-                        jobDiv.style.border = '1px solid blue';
-                        jobDiv.style.margin = '20px';
-                        jobDiv.style.padding = '10px';
+                        jobDiv.classList.add('job-container');
 
                         const img = document.createElement('img');
                         img.src = job.image;
