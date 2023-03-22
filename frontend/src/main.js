@@ -219,13 +219,10 @@ window.addEventListener('scroll', () => {
 const feedJobs = () => {
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
-            console.log(jobs);
             start += jobs.length;
-            console.log(start);
             for (const job of jobs) {
                 serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
                     .then(creator => {
-
                         const jobDiv = document.createElement('div');
                         jobDiv.classList.add('job-container');
 
@@ -237,7 +234,6 @@ const feedJobs = () => {
                         title.innerText = `${job.title}\n`;
                         title.style.marginLeft = '10px';
                         jobDiv.appendChild(title);
-
 
                         const creatorInfo = document.createElement('div');
                         creatorInfo.style.color = 'grey';
@@ -266,7 +262,8 @@ const feedJobs = () => {
 
                         const comments = document.createElement('span');
                         comments.innerText = `${job.comments.length} comments`;
-                        comments.style.marginLeft = '40px';
+                        comments.style.position = 'absolute';
+                        comments.style.right = '10px';
                         jobDiv.appendChild(comments);
 
                         document.getElementById('jobs').appendChild(jobDiv);
