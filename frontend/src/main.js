@@ -3,6 +3,10 @@ import { BACKEND_PORT } from './config.js';
 import { fileToDataUrl } from './helpers.js';
 
 
+// -------------------- global variables --------------------
+
+let start = 0;
+
 // -------------------- helper --------------------
 
 const swapPage = (currPage, newPage) => {
@@ -39,53 +43,28 @@ const serviceCall = (path, data, method) => {
     });
 }
 
-const css = (element, styles) => {
-    for (const property in styles) {
-        element.style[property] = styles[property];
-    }
-}
-
 const popup = (content) => {
-    const newDiv = document.createElement('div');
-    css(newDiv, {
-        display: 'block',
-        position: 'fixed',
-        zIndex: '1',
-        left: '0',
-        top: '0',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'auto',
-        backgroundColor: 'rgba(0,0,0,0.4)',
-    });
+    const popupPage = document.createElement('div');
+    popupPage.classList.add('popup-page');
 
     const container = document.createElement('div');
-    css(container, {
-        backgroundColor: 'white',
-        margin: '25% auto',
-        padding: '20px',
-        border: '1px solid grey',
-        borderRadius: '10px',
-        width: '70%'
-    });
+    container.classList.add('popup-container');
 
-    content.style.marginBottom = '20px';
+    content.style.marginTop = '20px';
     container.appendChild(content);
 
     const closeBtn = document.createElement('button');
     closeBtn.innerText = "close";
-    css(closeBtn, {
-        position: 'relative',
-        left: '85%'
-    });
+    closeBtn.classList.add('popup-close-btn');
+
     closeBtn.addEventListener('click', () => {
-        newDiv.parentNode.removeChild(newDiv);
+        popupPage.parentNode.removeChild(popupPage);
     });
     container.appendChild(closeBtn);
 
-    newDiv.appendChild(container);
+    popupPage.appendChild(container);
 
-    return newDiv;
+    return popupPage;
 }
 
 const errPopup = (errMsg) => {
@@ -167,13 +146,12 @@ document.getElementById('logout-button').addEventListener('click', () => {
     while (jobsDiv.firstChild) {
         jobsDiv.removeChild(jobsDiv.lastChild);
     }
+    start = 0;
 
     swapPage('logged-in', 'logged-out');
 })
 
 // -------------------- job --------------------
-
-let start = 0;
 
 const timeToStr = (datetime) => {
     const time = new Date(datetime);
@@ -221,50 +199,65 @@ const feedJobs = () => {
         .then(jobs => {
             start += jobs.length;
             for (const job of jobs) {
+                console.log(job);
                 serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
                     .then(creator => {
                         const jobDiv = document.createElement('div');
                         jobDiv.classList.add('job-container');
 
+                        // image
                         const img = document.createElement('img');
                         img.src = job.image;
                         jobDiv.appendChild(img);
 
+                        // title of job
                         const title = document.createElement('span');
                         title.innerText = `${job.title}\n`;
                         title.style.marginLeft = '10px';
                         jobDiv.appendChild(title);
 
+                        // name of creator and time posted
                         const creatorInfo = document.createElement('div');
                         creatorInfo.style.color = 'grey';
                         creatorInfo.innerText = `created by ${creator.name} ${timeCreated(job.createdAt)}`;
                         jobDiv.appendChild(creatorInfo);
 
+                        // time started
                         const startTime = document.createElement('div');
                         startTime.innerText = `started from ${timeToStr(job.start)}`;
                         jobDiv.appendChild(startTime);
 
+                        // discription
                         const description = document.createElement('div');
                         description.innerText = job.description;
                         jobDiv.appendChild(description);
 
+                        // likes
                         jobDiv.appendChild(likeJobBtn(job.id, job.likes));
 
                         const numLikes = document.createElement('span');
                         numLikes.innerText = ` ${job.likes.length} `;
-                        jobDiv.appendChild(numLikes);
-
+                        
                         const likesDiv = document.createElement('div');
                         likesDiv.id = `likes-${job.id}`;
                         likesDiv.style.display = 'inline-block';
-                        jobDiv.appendChild(likesDiv);
-                        jobDiv.appendChild(showLikes(likesDiv.id, job.likes));
+                        numLikes.appendChild(likesDiv);
+                        numLikes.appendChild(showLikes(likesDiv.id, job.likes));
+                        jobDiv.appendChild(numLikes);
 
-                        const comments = document.createElement('span');
-                        comments.innerText = `${job.comments.length} comments`;
-                        comments.style.position = 'absolute';
-                        comments.style.right = '10px';
-                        jobDiv.appendChild(comments);
+                        // comments
+                        const numComments = document.createElement('span');
+                        numComments.innerText = `${job.comments.length} `;
+                        
+                        const commentsDiv = document.createElement('div');
+                        commentsDiv.id = `comments-${job.id}`;
+                        commentsDiv.style.display = 'inline-block';
+                        numComments.appendChild(commentsDiv);
+                        numComments.appendChild(showComments(commentsDiv.id, job.comments));
+                        
+                        numComments.style.position = 'absolute';
+                        numComments.style.right = '10px';
+                        jobDiv.appendChild(numComments);
 
                         document.getElementById('jobs').appendChild(jobDiv);
                     });
@@ -305,19 +298,7 @@ const likeJobBtn = (jobId, likes) => {
 const showLikes = (id, likes) => {
     const likesSpan = document.createElement('span');
     likesSpan.innerText = `likes`;
-    css(likesSpan, {
-        color: 'blue',
-        textDecoration: 'underline',
-        cursor: 'pointer'
-    });
-
-    likesSpan.addEventListener('mouseover', () => {
-        likesSpan.style.opacity = 0.5;
-    });
-
-    likesSpan.addEventListener('mouseout', () => {
-        likesSpan.style.opacity = 1;
-    });
+    likesSpan.classList.add('openPopup');
 
     likesSpan.addEventListener('click', () => {
         const likesDiv = document.getElementById(id);
@@ -336,6 +317,33 @@ const showLikes = (id, likes) => {
     });
 
     return likesSpan;
+}
+
+const showComments = (id, comments) => {
+    const commentsSpan = document.createElement('span');
+    commentsSpan.innerText = `comments`;
+    commentsSpan.classList.add('openPopup');
+
+    commentsSpan.addEventListener('click', () => {
+        const commentsDiv = document.getElementById(id);
+
+        const commentsList = document.createElement('div');
+        const title = document.createElement('h3');
+        title.textContent = 'Comments:';
+        commentsList.appendChild(title);
+        for (const comment of comments) {
+            serviceCall(`/user?userId=${comment.userId}`, {}, 'GET')
+            .then(user => {
+                const commentDiv = document.createElement('div');
+                commentDiv.innerText = `${user.name}: ${comment.comment}`;
+                commentsList.appendChild(commentDiv);
+            });
+        }
+
+        commentsDiv.appendChild(popup(commentsList));
+    });
+
+    return commentsSpan;
 }
 
 // -------------------- Main --------------------

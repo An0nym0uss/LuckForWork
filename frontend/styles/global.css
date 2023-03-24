@@ -29,7 +29,43 @@ body {
     position: relative;
 }
 
+.openPopup {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
 
+.openPopup:hover {
+    opacity: 0.5;
+}
+
+.popup-page {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.popup-container {
+    background-color: white;
+    margin: 20% auto;
+    padding: 20px;
+    border: 1px solid grey;
+    border-radius: 10px;
+    width: 70%;
+    position: relative;
+}
+
+.popup-close-btn {
+    position: absolute;
+    right: 25px;
+    top: 15px;
+}
 
 @media (max-width: 400px) {
     .job-container {
