@@ -21,6 +21,12 @@ body {
     right: 5%;
 }
 
+.profile-btn {
+    position: absolute;
+    top: 8vh;
+    right: 5vw;
+}
+
 .job-container {
     width: 65vw;
     border: 1px solid blue;
@@ -65,6 +71,23 @@ body {
     position: absolute;
     right: 25px;
     top: 15px;
+}
+
+.info-container {
+    display: flex;
+    justify-content: center;
+}
+
+.info-box {
+    margin: 2rem;
+}
+
+.comment-box {
+    width: 400px;
+    height: 50px;
+    background: #eee;
+    border-radius: 5px;
+    margin: 16px 0;
 }
 
 @media (max-width: 400px) {
