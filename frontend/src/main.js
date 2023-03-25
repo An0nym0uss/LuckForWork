@@ -151,6 +151,11 @@ document.getElementById('logout-button').addEventListener('click', () => {
     swapPage('logged-in', 'logged-out');
 })
 
+document.getElementById('profile-button').addEventListener('click', () => {
+    const myid = localStorage.getItem('userId');
+    myProfile(myid);
+})
+
 // -------------------- job --------------------
 
 const timeToStr = (datetime) => {
@@ -195,6 +200,7 @@ window.addEventListener('scroll', () => {
 });
 
 const feedJobs = () => {
+
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
             start += jobs.length;
@@ -202,67 +208,85 @@ const feedJobs = () => {
                 console.log(job);
                 serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
                     .then(creator => {
-                        const jobDiv = document.createElement('div');
-                        jobDiv.classList.add('job-container');
-
-                        // image
-                        const img = document.createElement('img');
-                        img.src = job.image;
-                        jobDiv.appendChild(img);
-
-                        // title of job
-                        const title = document.createElement('span');
-                        title.innerText = `${job.title}\n`;
-                        title.style.marginLeft = '10px';
-                        jobDiv.appendChild(title);
-
-                        // name of creator and time posted
-                        const creatorInfo = document.createElement('div');
-                        creatorInfo.style.color = 'grey';
-                        creatorInfo.innerText = `created by ${creator.name} ${timeCreated(job.createdAt)}`;
-                        jobDiv.appendChild(creatorInfo);
-
-                        // time started
-                        const startTime = document.createElement('div');
-                        startTime.innerText = `started from ${timeToStr(job.start)}`;
-                        jobDiv.appendChild(startTime);
-
-                        // discription
-                        const description = document.createElement('div');
-                        description.innerText = job.description;
-                        jobDiv.appendChild(description);
-
-                        // likes
-                        jobDiv.appendChild(likeJobBtn(job.id, job.likes));
-
-                        const numLikes = document.createElement('span');
-                        numLikes.innerText = ` ${job.likes.length} `;
-                        
-                        const likesDiv = document.createElement('div');
-                        likesDiv.id = `likes-${job.id}`;
-                        likesDiv.style.display = 'inline-block';
-                        numLikes.appendChild(likesDiv);
-                        numLikes.appendChild(showLikes(likesDiv.id, job.likes));
-                        jobDiv.appendChild(numLikes);
-
-                        // comments
-                        const numComments = document.createElement('span');
-                        numComments.innerText = `${job.comments.length} `;
-                        
-                        const commentsDiv = document.createElement('div');
-                        commentsDiv.id = `comments-${job.id}`;
-                        commentsDiv.style.display = 'inline-block';
-                        numComments.appendChild(commentsDiv);
-                        numComments.appendChild(showComments(commentsDiv.id, job.comments));
-                        
-                        numComments.style.position = 'absolute';
-                        numComments.style.right = '10px';
-                        jobDiv.appendChild(numComments);
-
-                        document.getElementById('jobs').appendChild(jobDiv);
+                        document.getElementById('jobs').appendChild(jobBlock(job, creator.name));
                     });
             }
         });
+}
+
+const jobBlock = (job, user) => {
+    const jobDiv = document.createElement('div');
+    jobDiv.classList.add('job-container');
+
+    // image
+    const img = document.createElement('img');
+    img.src = job.image;
+    jobDiv.appendChild(img);
+
+    // title of job
+    const title = document.createElement('span');
+    title.innerText = `${job.title}\n`;
+    title.style.marginLeft = '10px';
+    jobDiv.appendChild(title);
+
+    // name of creator and time posted
+    const creatorInfo = document.createElement('div');
+    creatorInfo.style.color = 'grey';
+    creatorInfo.innerText = `created by `;
+
+    let createrName = document.createElement('span');
+    createrName.style.color = 'grey';
+    createrName.style.textDecoration = 'underline';
+    createrName.innerText = `${user} `;
+    createrName.id = `user-profile`;
+    userProfile(createrName, job.creatorId);
+    creatorInfo.appendChild(createrName);
+    
+    const creatorTime = document.createElement('span');
+    creatorTime.style.color = 'grey';
+    creatorTime.innerText = `${timeCreated(job.createdAt)}`;
+    creatorInfo.appendChild(creatorTime);
+
+    jobDiv.appendChild(creatorInfo);
+
+    // time started
+    const startTime = document.createElement('div');
+    startTime.innerText = `started from ${timeToStr(job.start)}`;
+    jobDiv.appendChild(startTime);
+
+    // discription
+    const description = document.createElement('div');
+    description.innerText = job.description;
+    jobDiv.appendChild(description);
+
+    // likes
+    jobDiv.appendChild(likeJobBtn(job.id, job.likes));
+
+    const numLikes = document.createElement('span');
+    numLikes.innerText = ` ${job.likes.length} `;
+    
+    const likesDiv = document.createElement('div');
+    likesDiv.id = `likes-${job.id}`;
+    likesDiv.style.display = 'inline-block';
+    numLikes.appendChild(likesDiv);
+    numLikes.appendChild(showLikes(likesDiv.id, job.likes));
+    jobDiv.appendChild(numLikes);
+
+    // comments
+    const numComments = document.createElement('span');
+    numComments.innerText = `${job.comments.length} `;
+    
+    const commentsDiv = document.createElement('div');
+    commentsDiv.id = `comments-${job.id}`;
+    commentsDiv.style.display = 'inline-block';
+    numComments.appendChild(commentsDiv);
+    numComments.appendChild(showComments(commentsDiv.id, job.comments, job.id));
+    
+    numComments.style.position = 'absolute';
+    numComments.style.right = '10px';
+    jobDiv.appendChild(numComments);
+
+    return jobDiv;
 }
 
 const likeJobBtn = (jobId, likes) => {
@@ -319,7 +343,7 @@ const showLikes = (id, likes) => {
     return likesSpan;
 }
 
-const showComments = (id, comments) => {
+const showComments = (id, comments, jobId) => {
     const commentsSpan = document.createElement('span');
     commentsSpan.innerText = `comments`;
     commentsSpan.classList.add('openPopup');
@@ -339,12 +363,185 @@ const showComments = (id, comments) => {
                 commentsList.appendChild(commentDiv);
             });
         }
+        const newComment = document.createElement('p');
+        newComment.contentEditable = "true";
+        newComment.id = "commentArea";
+        newComment.classList.add('comment-box');
+        commentsList.appendChild(newComment);
+
+        const newCommentButton = document.createElement('button');
+        commentsList.appendChild(newCommentButton);
+
+        newCommentButton.addEventListener('click', () => {
+            let data = {
+                id:jobId,
+                comment:document.getElementById('commentArea').textContent
+            }
+            serviceCall(`/job/comment`, data, 'POST');
+        })
 
         commentsDiv.appendChild(popup(commentsList));
     });
 
     return commentsSpan;
 }
+// -------------------- user --------------------
+const userProfile = (element, id) => {
+    element.addEventListener('click', () => {
+        swapPage('logged-in', 'profile-page');
+        serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
+            console.log(user)
+            const userDiv = document.createElement('div');
+
+            const profileTitle = document.createElement('h1');
+            profileTitle.innerText = `${user.name}'s profile`
+            userDiv.appendChild(profileTitle);
+
+            let data;
+            serviceCall(`/user?userId=${id}`, {}, 'GET').then(target => {
+                const mail = target.email;
+                const watchButton = document.createElement('button');
+                if (user.watcheeUserIds.includes(localStorage.getItem('userId'))) {
+                    watchButton.innerText = "Watch";
+                    data = {email: mail, turnon: true};
+                } else {
+                    watchButton.innerText = "Unwatch";
+                    data = {email: mail, turnon: false};
+                }
+                watchButton.addEventListener('click', ()=> {
+                    console.log(data);
+                    serviceCall(`/user/watch`, data, 'PUT');
+                })
+                userDiv.appendChild(watchButton);
+            })
+
+            const profilePicture = document.createElement('img');
+            profilePicture.src = user.image;
+            userDiv.appendChild(profilePicture);
+
+            const userName = document.createElement('div');
+            userName.innerText = `Name: ${user.name}`;
+            const userEmail = document.createElement('div');
+            userEmail.innerText = `Email: ${user.email}`;
+            userDiv.appendChild(userName);
+            userDiv.appendChild(userEmail);
+
+            const text1 = document.createElement('div');
+            text1.innerText = `${user.name}'s job post:`;
+            userDiv.appendChild(text1);
+            for (const job of user.jobs) {
+                userDiv.appendChild(jobBlock(job, user.name));
+            }
+
+            const text2 = document.createElement('div');
+            text2.innerText = `${user.name} is watched by:`;
+            userDiv.appendChild(text2);
+            for (const watchee of user.watcheeUserIds) {
+                serviceCall(`/user?userId=${watchee}`, {}, 'GET')
+                    .then(watchee => {
+                        const watcheeName = document.createElement('div');
+                        watcheeName.innerText = `${watchee.name}`;
+                        userDiv.appendChild(watcheeName);
+                    });
+            }
+            document.getElementById('userInfo').appendChild(userDiv);
+        })
+    });
+}
+
+const myProfile = (id) => {
+    swapPage('logged-in', 'profile-page');
+    serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
+        console.log(user)
+        const userDiv = document.createElement('div');
+
+        const profileTitle = document.createElement('h1');
+        profileTitle.innerText = `${user.name}'s profile`
+        userDiv.appendChild(profileTitle);
+
+        const modifyProfile = document.createElement('button');
+        modifyProfile.innerText = "Update my information";
+        modifyProfile.addEventListener('click', () => {
+            changeInfo(user);
+        })
+        userDiv.appendChild(modifyProfile);
+
+        const profilePicture = document.createElement('img');
+        profilePicture.src = user.image;
+        userDiv.appendChild(profilePicture);
+
+        const userName = document.createElement('div');
+        userName.innerText = `Name: ${user.name}`;
+        const userEmail = document.createElement('div');
+        userEmail.innerText = `Email: ${user.email}`;
+        userDiv.appendChild(userName);
+        userDiv.appendChild(userEmail);
+
+        const text1 = document.createElement('div');
+        text1.innerText = `${user.name}'s job post:`;
+        userDiv.appendChild(text1);
+        for (const job of user.jobs) {
+            userDiv.appendChild(jobBlock(job, user.name));
+        }
+
+        const text2 = document.createElement('div');
+        text2.innerText = `${user.name} is watched by:`;
+        userDiv.appendChild(text2);
+        for (const watchee of user.watcheeUserIds) {
+            serviceCall(`/user?userId=${watchee}`, {}, 'GET')
+                .then(watchee => {
+                    const watcheeName = document.createElement('div');
+                    watcheeName.innerText = `${watchee.name}`;
+                    userDiv.appendChild(watcheeName);
+                });
+        }
+        document.getElementById('userInfo').appendChild(userDiv);
+    })
+}
+
+const changeInfo = (user) => {
+    swapPage('profile-page', 'account-page');
+    document.getElementById('newName').value=`${user.name}`;
+    document.getElementById('newEmail').value=`${user.email}`;
+
+    document.getElementById('password-forward').addEventListener('click', () => {
+        let dataPass = {
+            email:document.getElementById('newPass').value,
+        }
+        serviceCall(`/user`, dataPass, 'PUT'). then(res => {
+            alert("Password updated successfully!")
+        });
+    })
+
+    document.getElementById('account-forward').addEventListener('click', () => {
+        let dataBasic = {
+            email:document.getElementById('newEmail').value,
+            name:document.getElementById('newName').value
+        }
+        serviceCall(`/user`, dataBasic, 'PUT'). then(res => {
+            alert("Info updated successfully!")
+        });
+    })
+
+    document.getElementById('account-back').addEventListener('click', () => {
+        swapPage('account-page', 'profile-page');
+    })
+}
+// -------------------- Adding content--------------------
+document.getElementById('add-jobs-btn').addEventListener('click', () => {
+    swapPage('logged-in', 'new-post-page');
+    document.getElementById('post-submit-btm').addEventListener('click', () => {
+        let data = {
+            title:document.getElementById('title').value,
+            image:document.getElementById('image').value,
+            start:document.getElementById('date').value,
+            description:document.getElementById('description').value
+        }
+        serviceCall(`/job`, data, 'POST');
+    })
+})
+
+
 
 // -------------------- Main --------------------
 // Must be at the bottom
