@@ -230,6 +230,7 @@ const feedJobs = () => {
         });
 }
 
+// construct an individual job block
 const jobBlock = (job, user) => {
     const jobDiv = document.createElement('div');
     jobDiv.classList.add('job-container');
@@ -383,11 +384,19 @@ const showComments = (id, comments, jobId) => {
         const title = document.createElement('h3');
         title.textContent = 'Comments:';
         commentsList.appendChild(title);
+        commentsList.classList.add("commentComments");
         for (const comment of comments) {
             serviceCall(`/user?userId=${comment.userId}`, {}, 'GET')
             .then(user => {
                 const commentDiv = document.createElement('div');
-                commentDiv.innerText = `${user.name}: ${comment.comment}`;
+                const commentName =  document.createElement('span')
+                commentName.innerText = `${user.name}`;
+                commentName.classList.add('link');
+                accessProfile(commentName, user.id);
+                const commentComment =  document.createElement('span')
+                commentComment.innerText = `: ${comment.comment}`;
+                commentDiv.appendChild(commentName);
+                commentDiv.appendChild(commentComment);
                 commentsList.appendChild(commentDiv);
             });
         }
@@ -397,7 +406,8 @@ const showComments = (id, comments, jobId) => {
         commentsList.appendChild(newComment);
 
         const newCommentButton = document.createElement('button');
-        newCommentButton.innerText = "add comment"
+        newCommentButton.innerText = "Add comment"
+        newCommentButton.classList.add("commentButton")
         commentsList.appendChild(newCommentButton);
 
         newCommentButton.addEventListener('click', () => {
@@ -406,6 +416,7 @@ const showComments = (id, comments, jobId) => {
                 comment: document.getElementById('commentArea').value
             }
             serviceCall(`/job/comment`, data, 'POST');
+            alert("Comment posted!")
         })
 
         commentsDiv.appendChild(popup(commentsList));
@@ -414,6 +425,7 @@ const showComments = (id, comments, jobId) => {
     return commentsSpan;
 }
 // -------------------- user --------------------
+// Check if the profile page the user attempting to access belong to themselves
 const accessProfile = (element, id) => {
     element.addEventListener('click', () => {
         if (localStorage.getItem('userId') == id) {
@@ -423,6 +435,8 @@ const accessProfile = (element, id) => {
         }
     })
 }
+
+// Navigate to and construct a profile page of a user
 const userProfile = (id) => {
 
     swapPage(localStorage.getItem('currPage'), 'profile-page');
@@ -433,18 +447,22 @@ const userProfile = (id) => {
         emptydiv.removeChild(emptydiv.lastChild);
     }
 
-    // swapPage(localStorage.getItem('currPage'), 'profile-page');
-    // localStorage.setItem('prevPage', localStorage.getItem('currPage'));
-    // localStorage.setItem('currPage', 'profile-page');
-
-
     serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
-        console.log(user)
         const userDiv = document.createElement('div');
+        userDiv.classList.add('infoBox');
 
         const profileTitle = document.createElement('h1');
         profileTitle.innerText = `${user.name}'s profile`
         userDiv.appendChild(profileTitle);
+
+        const backButton = document.createElement('button');
+        backButton.innerText = "Go back";
+        userDiv.appendChild(backButton);
+        backButton.addEventListener('click', () => {
+            swapPage('profile-page', 'logged-in');
+            localStorage.setItem('prevPage', 'profile-page');
+            localStorage.setItem('currPage', 'logged-in');
+        })
 
         let data;
         const mail = user.email;
@@ -474,28 +492,37 @@ const userProfile = (id) => {
         profilePicture.classList.add('profile-picture');
         userDiv.appendChild(profilePicture);
 
-        const userName = document.createElement('div');
-        userName.innerText = `Name: ${user.name}`;
-        const userEmail = document.createElement('div');
-        userEmail.innerText = `Email: ${user.email}`;
-        userDiv.appendChild(userName);
-        userDiv.appendChild(userEmail);
+        const basicInfoDiv = document.createElement('div');
+        basicInfoDiv.classList.add("basicInfoBox");
+            const userName = document.createElement('div');
+            userName.innerText = `Name: ${user.name}`;
+            const userEmail = document.createElement('div');
+            userEmail.innerText = `Email: ${user.email}`;
+            basicInfoDiv.appendChild(userName);
+            basicInfoDiv.appendChild(userEmail);
+            basicInfoDiv.appendChild(document.createElement('br'));
 
-        const text1 = document.createElement('div');
-        text1.innerText = `${user.name}'s job post:`;
-        userDiv.appendChild(text1);
+            const text1 = document.createElement('div');
+            text1.innerText = `${user.name}'s job post:`;
+            basicInfoDiv.appendChild(text1);
+
+        userDiv.appendChild(basicInfoDiv);
+
         for (const job of user.jobs) {
             userDiv.appendChild(jobBlock(job, user.name));
         }
 
         const text2 = document.createElement('div');
         text2.innerText = `${user.name} is watched by:`;
+        text2.style.marginTop = '20px';
         userDiv.appendChild(text2);
         for (const watchee of user.watcheeUserIds) {
             serviceCall(`/user?userId=${watchee}`, {}, 'GET')
                 .then(watchee => {
                     const watcheeName = document.createElement('div');
                     watcheeName.innerText = `${watchee.name}`;
+                    watcheeName.classList.add("link")
+                    accessProfile(watcheeName, watchee.id);
                     userDiv.appendChild(watcheeName);
                 });
         }
@@ -503,6 +530,7 @@ const userProfile = (id) => {
     })
 }
 
+// Navigate to and construct a profile page where the profile page belong to the current user so a special profile page will be constructed
 const myProfile = (id) => {
     
     swapPage(localStorage.getItem('currPage'), 'profile-page');
@@ -521,6 +549,15 @@ const myProfile = (id) => {
         const profileTitle = document.createElement('h1');
         profileTitle.innerText = `My profile`
         userDiv.appendChild(profileTitle);
+
+        const backButton = document.createElement('button');
+        backButton.innerText = "Home page";
+        userDiv.appendChild(backButton);
+        backButton.addEventListener('click', () => {
+            swapPage('profile-page', 'logged-in');
+            localStorage.setItem('prevPage', 'profile-page');
+            localStorage.setItem('currPage', 'logged-in');
+        })
 
         const modifyProfile = document.createElement('button');
         modifyProfile.innerText = "Update my information";
@@ -558,6 +595,7 @@ const myProfile = (id) => {
 
         const text2 = document.createElement('div');
         text2.innerText = `${user.name} is watched by:`;
+        text2.style.marginTop = '20px';
         userDiv.appendChild(text2);
         for (const watchee of user.watcheeUserIds) {
             serviceCall(`/user?userId=${watchee}`, {}, 'GET')
@@ -573,6 +611,7 @@ const myProfile = (id) => {
     })
 }
 
+// Navigate to the change personal info page where user can change their information
 const changeInfo = (user) => {
     swapPage('profile-page', 'account-page');
     localStorage.setItem('currPage', 'account-page');
@@ -582,6 +621,11 @@ const changeInfo = (user) => {
     document.getElementById('newName').value=`${user.name}`;
     document.getElementById('newEmail').value=`${user.email}`;
 
+    const img = document.createElement('img');
+    img.src = user.image;
+    document.getElementById('profileSpace').appendChild(img);
+
+    // Change personal info page confirm update name or email button
     document.getElementById('password-forward').addEventListener('click', () => {
         let dataPass = {
             email:document.getElementById('newPass').value,
@@ -591,6 +635,7 @@ const changeInfo = (user) => {
         });
     })
 
+    // Change personal info page confirm update password button
     document.getElementById('account-forward').addEventListener('click', () => {
         let dataBasic = {
             email:document.getElementById('newEmail').value,
@@ -600,7 +645,18 @@ const changeInfo = (user) => {
             alert("Info updated successfully!")
         });
     })
+    
+    // Change personal info page confirm update profile button
+    document.getElementById('profile-forward').addEventListener('click', () => {
+        let dataProfile = {
+            image:document.getElementById('newProfile').value,
+        }
+        serviceCall(`/user`, dataProfile, 'PUT'). then(res => {
+            alert("Profile changed successfully!")
+        });
+    })
 
+    // Change personal info page go back button
     document.getElementById('account-back').addEventListener('click', () => {
         swapPage('account-page', 'profile-page');
         localStorage.setItem('currPage', 'account-page');

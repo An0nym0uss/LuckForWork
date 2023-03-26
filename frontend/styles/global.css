@@ -91,17 +91,30 @@ body {
     top: 15px;
 }
 
-.info-container {
+.updateContainer {
     display: flex;
     justify-content: center;
+    flex-direction: column;
 }
 
-.comment-box {
-    width: 100%;
-    height: 40px;
-    background: #eee;
-    border-radius: 5px;
-    margin: 16px 0;
+.updateBaiscBox {
+    margin-top: 2rem;
+    border-top: 3px solid black;
+    min-width: 400px;
+}
+
+.updateInput {
+    margin-bottom: 1rem;
+    min-width: 200px;
+}
+
+h4 {
+    margin-top: 5px;
+}
+
+.postInput {
+    margin-bottom: 1rem;
+    min-width: 350px;
 }
 
 .link {
@@ -116,16 +129,14 @@ body {
 .profile-picture {
     position: absolute;
     top: 2vh;
-    left: 26vw;
+    left: 80%;
     width: 100px;
     height: 100px
 }
 
 .infoBox {
     position: relative;
-    align-items: center;
-    width: 650px;
-    margin: 0 auto;
+    min-width: 400px;
 }
 
 .basicInfoBox {
@@ -142,6 +153,26 @@ body {
     margin-left: 82%;
 }
 
+.commentButton {
+    position: absolute;
+    margin-top: -1rem;
+    right: 1rem;
+    bottom: 1rem;
+}
+
+.comment-box {
+    width: 97.5%;
+    height: 3rem;
+    background: #eee;
+    border-radius: 5px;
+    margin: 16px 0;
+    position: absolute;
+    bottom: 1rem;
+}
+
+.commentComments {
+    margin-bottom: 5rem;
+}
 
 @media (max-width: 400px) {
     .job-container {
