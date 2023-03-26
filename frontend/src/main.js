@@ -598,13 +598,20 @@ const changeInfo = (user) => {
 
     // Change personal info page confirm update password button
     document.getElementById('account-forward').addEventListener('click', () => {
+        const newEmail = document.getElementById('newEmail').value;
+        const newName = document.getElementById('newName').value;
         let dataBasic = {
-            email: document.getElementById('newEmail').value,
-            name: document.getElementById('newName').value
+            email: newEmail === user.email ? undefined : newEmail,
+            name:  newName === user.name ? undefined : newName
         }
-        serviceCall(`/user`, dataBasic, 'PUT').then(res => {
-            alert("Info updated successfully!")
-        });
+        if (dataBasic.email || dataBasic.name) {
+
+            serviceCall(`/user`, dataBasic, 'PUT').then(res => {
+                alert("Info updated successfully!")
+            });
+        } else {
+            errPopup("No change in name and email.");
+        }
     })
 
     // Change personal info page confirm update profile button
