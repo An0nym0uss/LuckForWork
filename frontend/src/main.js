@@ -590,7 +590,7 @@ const changeInfo = (user) => {
     // Change personal info page confirm update password button
     document.getElementById('password-forward').addEventListener('click', () => {
         let dataPass = {
-            email: document.getElementById('newPass').value,
+            password: document.getElementById('newPass').value,
         }
         serviceCall(`/user`, dataPass, 'PUT').then(res => {
             alert("Password updated successfully!")
@@ -603,7 +603,7 @@ const changeInfo = (user) => {
         const newName = document.getElementById('newName').value;
         let dataBasic = {
             email: newEmail === user.email ? undefined : newEmail,
-            name:  newName === user.name ? undefined : newName
+            name: newName === user.name ? undefined : newName
         }
         if (dataBasic.email || dataBasic.name) {
             serviceCall(`/user`, dataBasic, 'PUT').then(res => {
