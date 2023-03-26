@@ -1,1 +1,4 @@
-TODO!
+- Added alt text for images e.g. profile image and job image.
+- Added a fixed header with buttons in job posts page so that users can access these functionalities wherever they scroll.
+- Tries to make index.html parseable.
+- When infinite scrolling for job posts, the webpage tells you if its loading or it has reached the end.

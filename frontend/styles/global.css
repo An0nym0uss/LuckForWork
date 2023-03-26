@@ -1,7 +1,187 @@
 /* base styles, feel free to edit */
-html, body {
+body {
     margin: 0;
     padding: 0;
-    height: 100%;
     font-family: Arial;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hide {
+    display: none;
+}
+
+#home-page {
+    margin-top: 50px;
+}
+
+.page-header {
+    height: 50px;
+    width: 100vw;
+    background-color: yellow;
+    position: fixed;
+    top: 0px;
+    z-index: 1;
+}
+
+.header-buttons {
+    position: absolute;
+    top: 15px;
+    right: 10vw;
+}
+
+#add-jobs-btn {
+    position: absolute;
+    top: 15px;
+    left: 10vw;
+}
+
+#profile-button {
+    position: relative;
+    right: 20px;
+}
+
+.job-container {
+    width: 65vw;
+    border: 1px solid blue;
+    margin: 20px;
+    padding: 15px;
+    position: relative;
+}
+
+.openPopup {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.openPopup:hover {
+    opacity: 0.5;
+}
+
+.popup-page {
+    display: block;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.popup-container {
+    background-color: white;
+    margin: 20% auto;
+    padding: 20px;
+    border: 1px solid grey;
+    border-radius: 10px;
+    width: 70%;
+    position: relative;
+}
+
+.popup-close-btn {
+    position: absolute;
+    right: 25px;
+    top: 15px;
+}
+
+.updateContainer {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.updateBaiscBox {
+    margin-top: 2rem;
+    border-top: 3px solid black;
+    min-width: 400px;
+}
+
+.updateInput {
+    margin-bottom: 1rem;
+    min-width: 200px;
+}
+
+h4 {
+    margin-top: 5px;
+}
+
+.postInput {
+    margin-bottom: 1rem;
+    min-width: 350px;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: default;
+}
+
+.link:hover {
+    opacity: 70%;
+}
+
+.profile-picture {
+    position: absolute;
+    top: 2vh;
+    left: 80%;
+    width: 100px;
+    height: 100px
+}
+
+.infoBox {
+    position: relative;
+    min-width: 400px;
+}
+
+.basicInfoBox {
+    margin-top: 1rem;
+    margin-bottom: -1rem;
+}
+
+.infoContainer {
+    display: flex;
+    justify-content: center;
+}
+
+.update-button {
+    margin-left: 82%;
+}
+
+.commentButton {
+    position: absolute;
+    margin-top: -1rem;
+    right: 1rem;
+    bottom: 1rem;
+}
+
+.comment-box {
+    width: 97.5%;
+    height: 3rem;
+    background: #eee;
+    border-radius: 5px;
+    margin: 16px 0;
+    position: absolute;
+    bottom: 1rem;
+}
+
+.commentComments {
+    margin-bottom: 5rem;
+}
+
+@media (max-width: 400px) {
+    .job-container {
+        width: 75vw;
+    }
+}
+
+@media (min-width: 800px) {
+    .job-container {
+        width: 580px;
+    }
 }
