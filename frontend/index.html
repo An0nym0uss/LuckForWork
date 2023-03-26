@@ -77,16 +77,12 @@
                 <h1>Job Posts</h1>
             </div>
             
-            <div class="page-header">
-                <button id="add-jobs-btn">Post new job</button>
-                <div class="header-buttons">
-                    <button id="profile-button">Account</button>
-                    <button id="logout-button">Logout</button>
-                </div>
-            </div>
+            <button id="logout-button" class="logout-btn">Logout</button>
+            <button id="profile-button" class="profile-btn">Account</button>
 
             <div id="jobs"></div>
             <button id="load-jobs-btn">Load more job posts</button>
+            <button id="add-jobs-btn">Create a new job post</button>
 
         </section>
 
@@ -125,7 +121,7 @@
                 start-date: <br>
                 <input type="date" id="date"> <br>
                 image: <br>
-                <input type="text" id="image"> <br>
+                <input type="file" id="image"> <br>
                 A brief description of the job: <br>
                 <textarea id="description" cols="30" rows="10"></textarea> <br>
                 <button id="post-submit-btm">Submit</button>
