@@ -215,10 +215,8 @@ const feedJobs = () => {
 
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
-            if (jobs.length === 0) {
-                window.scrollBy(0, -50);
-            }
             start += jobs.length;
+            localStorage.setItem('currPage', 'logged-in');
             for (const job of jobs) {
                 console.log(job);
                 serviceCall(`/user?userId=${job.creatorId}`, {}, 'GET')
@@ -263,6 +261,7 @@ const jobBlock = (job, user) => {
     createrName.style.textDecoration = 'underline';
     createrName.innerText = `${user} `;
     createrName.id = `user-profile`;
+    createrName.classList.add('link');
     accessProfile(createrName, job.creatorId);
     creatorInfo.appendChild(createrName);
     
@@ -358,6 +357,8 @@ const showLikes = (id, likes) => {
         for (const user of likes) {
             const userDiv = document.createElement('div');
             userDiv.innerText = user.userName;
+            userDiv.classList.add('link');
+            accessProfile(userDiv, user.userId);
             likesList.appendChild(userDiv);
         }
 
@@ -387,19 +388,19 @@ const showComments = (id, comments, jobId) => {
                 commentsList.appendChild(commentDiv);
             });
         }
-        const newComment = document.createElement('textarea');
+        const newComment = document.createElement('p');
+        newComment.contentEditable = "true";
         newComment.id = "commentArea";
         newComment.classList.add('comment-box');
         commentsList.appendChild(newComment);
 
         const newCommentButton = document.createElement('button');
-        newCommentButton.innerText = "add comment"
         commentsList.appendChild(newCommentButton);
 
         newCommentButton.addEventListener('click', () => {
             let data = {
-                id: jobId,
-                comment: document.getElementById('commentArea').value
+                id:jobId,
+                comment:document.getElementById('commentArea').textContent
             }
             serviceCall(`/job/comment`, data, 'POST');
         })
@@ -424,6 +425,15 @@ const userProfile = (id) => {
     swapPage(localStorage.getItem('currPage'), 'profile-page');
     localStorage.setItem('prevPage', localStorage.getItem('currPage'));
     localStorage.setItem('currPage', 'profile-page');
+    const emptydiv = document.getElementById('userInfo');
+    while (emptydiv.firstChild) {
+        emptydiv.removeChild(emptydiv.lastChild);
+    }
+
+    // swapPage(localStorage.getItem('currPage'), 'profile-page');
+    // localStorage.setItem('prevPage', localStorage.getItem('currPage'));
+    // localStorage.setItem('currPage', 'profile-page');
+
 
     serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
         console.log(user)
@@ -453,6 +463,7 @@ const userProfile = (id) => {
 
         const profilePicture = document.createElement('img');
         profilePicture.src = user.image;
+        profilePicture.classList.add('profile-picture');
         userDiv.appendChild(profilePicture);
 
         const userName = document.createElement('div');
@@ -484,16 +495,20 @@ const userProfile = (id) => {
     })
 }
 
-
 const myProfile = (id) => {
     
-    swapPage('logged-in', 'profile-page');
+    swapPage(localStorage.getItem('currPage'), 'profile-page');
+    localStorage.setItem('prevPage', localStorage.getItem('currPage'));
     localStorage.setItem('currPage', 'profile-page');
-    localStorage.setItem('prevPage', 'logged-in');
+    const emptydiv = document.getElementById('userInfo');
+    while (emptydiv.firstChild) {
+        emptydiv.removeChild(emptydiv.lastChild);
+    }
+    
 
     serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
-        console.log(user)
         const userDiv = document.createElement('div');
+        userDiv.classList.add('infoBox');
 
         const profileTitle = document.createElement('h1');
         profileTitle.innerText = `My profile`
@@ -501,25 +516,34 @@ const myProfile = (id) => {
 
         const modifyProfile = document.createElement('button');
         modifyProfile.innerText = "Update my information";
+        modifyProfile.style.marginTop = '-1rem';
         modifyProfile.addEventListener('click', () => {
             changeInfo(user);
         })
         userDiv.appendChild(modifyProfile);
 
+
         const profilePicture = document.createElement('img');
         profilePicture.src = user.image;
+        profilePicture.classList.add('profile-picture');
         userDiv.appendChild(profilePicture);
 
-        const userName = document.createElement('div');
-        userName.innerText = `Name: ${user.name}`;
-        const userEmail = document.createElement('div');
-        userEmail.innerText = `Email: ${user.email}`;
-        userDiv.appendChild(userName);
-        userDiv.appendChild(userEmail);
+        const basicInfoDiv = document.createElement('div');
+        basicInfoDiv.classList.add("basicInfoBox");
+            const userName = document.createElement('div');
+            userName.innerText = `Name: ${user.name}`;
+            const userEmail = document.createElement('div');
+            userEmail.innerText = `Email: ${user.email}`;
+            basicInfoDiv.appendChild(userName);
+            basicInfoDiv.appendChild(userEmail);
+            basicInfoDiv.appendChild(document.createElement('br'));
 
-        const text1 = document.createElement('div');
-        text1.innerText = `${user.name}'s job post:`;
-        userDiv.appendChild(text1);
+            const text1 = document.createElement('div');
+            text1.innerText = `${user.name}'s job post:`;
+            basicInfoDiv.appendChild(text1);
+
+        userDiv.appendChild(basicInfoDiv);
+
         for (const job of user.jobs) {
             userDiv.appendChild(jobBlock(job, user.name));
         }
@@ -532,6 +556,8 @@ const myProfile = (id) => {
                 .then(watchee => {
                     const watcheeName = document.createElement('div');
                     watcheeName.innerText = `${watchee.name}`;
+                    watcheeName.classList.add("link")
+                    accessProfile(watcheeName, watchee.id);
                     userDiv.appendChild(watcheeName);
                 });
         }
@@ -606,6 +632,7 @@ document.getElementById('post-back-btm').addEventListener('click', () => {
 const updatePost = (job) => {
 
     const button = document.createElement('button');
+    button.classList.add("update-button");
     button.innerText = "Update";
 
     // Job block update button
