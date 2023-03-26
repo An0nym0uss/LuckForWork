@@ -447,22 +447,20 @@ const userProfile = (id) => {
         userDiv.appendChild(profileTitle);
 
         let data;
-        serviceCall(`/user?userId=${id}`, {}, 'GET').then(target => {
-            const mail = target.email;
-            const watchButton = document.createElement('button');
-            if (user.watcheeUserIds.includes(localStorage.getItem('userId'))) {
-                watchButton.innerText = "Watch";
-                data = {email: mail, turnon: true};
-            } else {
-                watchButton.innerText = "Unwatch";
-                data = {email: mail, turnon: false};
-            }
-            watchButton.addEventListener('click', ()=> {
-                console.log(data);
-                serviceCall(`/user/watch`, data, 'PUT');
-            })
-            userDiv.appendChild(watchButton);
+        const mail = user.email;
+        const watchButton = document.createElement('button');
+        if (user.watcheeUserIds.indexOf(localStorage.getItem('userId'))) {
+            watchButton.innerText = "Unwatch";
+            data = {email: mail, turnon: false};
+        } else {
+            watchButton.innerText = "Watch";
+            data = {email: mail, turnon: true};
+        }
+        watchButton.addEventListener('click', ()=> {
+            console.log(data);
+            serviceCall(`/user/watch`, data, 'PUT');
         })
+        userDiv.appendChild(watchButton);
 
         const profilePicture = document.createElement('img');
         profilePicture.src = user.image;
