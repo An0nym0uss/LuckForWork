@@ -215,6 +215,9 @@ const feedJobs = () => {
 
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
+            if (jobs.length === 0) {
+                window.scrollBy(0, -50);
+            }
             start += jobs.length;
             for (const job of jobs) {
                 console.log(job);
@@ -384,19 +387,19 @@ const showComments = (id, comments, jobId) => {
                 commentsList.appendChild(commentDiv);
             });
         }
-        const newComment = document.createElement('p');
-        newComment.contentEditable = "true";
+        const newComment = document.createElement('textarea');
         newComment.id = "commentArea";
         newComment.classList.add('comment-box');
         commentsList.appendChild(newComment);
 
         const newCommentButton = document.createElement('button');
+        newCommentButton.innerText = "add comment"
         commentsList.appendChild(newCommentButton);
 
         newCommentButton.addEventListener('click', () => {
             let data = {
-                id:jobId,
-                comment:document.getElementById('commentArea').textContent
+                id: jobId,
+                comment: document.getElementById('commentArea').value
             }
             serviceCall(`/job/comment`, data, 'POST');
         })
