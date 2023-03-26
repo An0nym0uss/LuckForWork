@@ -15,34 +15,16 @@ body {
     display: none;
 }
 
-#home-page {
-    margin-top: 50px;
-}
-
-.page-header {
-    height: 50px;
-    width: 100vw;
-    background-color: yellow;
+.logout-btn {
     position: fixed;
-    top: 0px;
-    z-index: 1;
+    top: 3%;
+    right: 5%;
 }
 
-.header-buttons {
+.profile-btn {
     position: absolute;
-    top: 15px;
-    right: 10vw;
-}
-
-#add-jobs-btn {
-    position: absolute;
-    top: 15px;
-    left: 10vw;
-}
-
-#profile-button {
-    position: relative;
-    right: 20px;
+    top: 8vh;
+    right: 5vw;
 }
 
 .job-container {
@@ -66,7 +48,7 @@ body {
 .popup-page {
     display: block;
     position: fixed;
-    z-index: 2;
+    z-index: 1;
     left: 0;
     top: 0;
     width: 100vw;
@@ -101,18 +83,45 @@ body {
 }
 
 .comment-box {
-    width: 100%;
-    height: 40px;
+    width: 400px;
+    height: 50px;
     background: #eee;
     border-radius: 5px;
     margin: 16px 0;
-    overflow-y: scroll;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: default;
+}
+
+.link:hover {
+    opacity: 70%;
 }
 
 .profile-picture {
-    width: 180px;
-    height: 180px
+    position: absolute;
+    top:40px;
+    right: 20px;
+    width: 100px;
+    height: 100px
 }
+
+.infoBox {
+    position: relative;
+    align-items: center;
+    width: 650px;
+}
+
+.basicInfoBox {
+    margin-top: 1rem;
+    margin-bottom: -1rem;
+}
+
+.update-button {
+    margin-left: 82%;
+}
+
 
 @media (max-width: 400px) {
     .job-container {
