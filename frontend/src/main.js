@@ -200,7 +200,6 @@ window.addEventListener('scroll', () => {
             shouldLoad = false;
             setTimeout(() => {
                 feedJobs();
-                loadMsg.removeChild(loading);
                 shouldLoad = true;
             }, 500);
         }
@@ -208,11 +207,13 @@ window.addEventListener('scroll', () => {
 });
 
 const feedJobs = () => {
-
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
+            const loadMsg = document.getElementById('load-message');
+            while (loadMsg.firstChild) {
+                loadMsg.removeChild(loadMsg.lastChild);
+            }
             if (jobs.length === 0) {
-                const loadMsg = document.getElementById('load-message');
                 const reachesEnd = document.createElement('h2');
                 reachesEnd.innerText = 'You have reached the end.';
                 loadMsg.appendChild(reachesEnd);
@@ -586,7 +587,7 @@ const changeInfo = (user) => {
     img.src = user.image;
     document.getElementById('profileSpace').appendChild(img);
 
-    // Change personal info page confirm update name or email button
+    // Change personal info page confirm update password button
     document.getElementById('password-forward').addEventListener('click', () => {
         let dataPass = {
             email: document.getElementById('newPass').value,
@@ -596,7 +597,7 @@ const changeInfo = (user) => {
         });
     })
 
-    // Change personal info page confirm update password button
+    // Change personal info page confirm update name or email button
     document.getElementById('account-forward').addEventListener('click', () => {
         const newEmail = document.getElementById('newEmail').value;
         const newName = document.getElementById('newName').value;
@@ -605,7 +606,6 @@ const changeInfo = (user) => {
             name:  newName === user.name ? undefined : newName
         }
         if (dataBasic.email || dataBasic.name) {
-
             serviceCall(`/user`, dataBasic, 'PUT').then(res => {
                 alert("Info updated successfully!")
             });
