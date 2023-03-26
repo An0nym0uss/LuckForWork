@@ -574,6 +574,43 @@ const myProfile = (id) => {
     })
 }
 
+// Change personal info page confirm update password button
+document.getElementById('password-forward').addEventListener('click', () => {
+    let dataPass = {
+        password: document.getElementById('newPass').value,
+    }
+    serviceCall(`/user`, dataPass, 'PUT').then(res => {
+        alert("Password updated successfully!")
+    });
+})
+
+// Change personal info page confirm update name or email button
+document.getElementById('account-forward').addEventListener('click', () => {
+    const newEmail = document.getElementById('newEmail').value;
+    const newName = document.getElementById('newName').value;
+    let dataBasic = {
+        email: newEmail === user.email ? undefined : newEmail,
+        name: newName === user.name ? undefined : newName
+    }
+    if (dataBasic.email || dataBasic.name) {
+        serviceCall(`/user`, dataBasic, 'PUT').then(res => {
+            alert("Info updated successfully!")
+        });
+    } else {
+        errPopup("No change in name and email.");
+    }
+})
+
+// Change personal info page confirm update profile button
+document.getElementById('profile-forward').addEventListener('click', () => {
+    const newProfile = document.getElementById('newProfile').files[0];
+    fileToDataUrl(newProfile).then(url => {
+        serviceCall(`/user`, { image: url }, 'PUT').then(res => {
+            alert("Profile changed successfully!")
+        });
+    });
+})
+
 // Navigate to the change personal info page where user can change their information
 const changeInfo = (user) => {
     swapPage('profile-page', 'account-page');
@@ -593,43 +630,6 @@ const changeInfo = (user) => {
     img.classList.add("profile-selected");
     imgSpace.appendChild(img);
 
-    // Change personal info page confirm update password button
-    document.getElementById('password-forward').addEventListener('click', () => {
-        let dataPass = {
-            password: document.getElementById('newPass').value,
-        }
-        serviceCall(`/user`, dataPass, 'PUT').then(res => {
-            alert("Password updated successfully!")
-        });
-    })
-
-    // Change personal info page confirm update name or email button
-    document.getElementById('account-forward').addEventListener('click', () => {
-        const newEmail = document.getElementById('newEmail').value;
-        const newName = document.getElementById('newName').value;
-        let dataBasic = {
-            email: newEmail === user.email ? undefined : newEmail,
-            name: newName === user.name ? undefined : newName
-        }
-        if (dataBasic.email || dataBasic.name) {
-            serviceCall(`/user`, dataBasic, 'PUT').then(res => {
-                alert("Info updated successfully!")
-            });
-        } else {
-            errPopup("No change in name and email.");
-        }
-    })
-
-    // Change personal info page confirm update profile button
-    document.getElementById('profile-forward').addEventListener('click', () => {
-        const newProfile = document.getElementById('newProfile').files[0];
-        fileToDataUrl(newProfile).then(url => {
-            serviceCall(`/user`, {image: url}, 'PUT').then(res => {
-                alert("Profile changed successfully!")
-            });
-        });
-    })
-
     // Change personal info page go back button
     accessProfile(document.getElementById('account-back'), localStorage.getItem('userId'));
 }
@@ -640,19 +640,19 @@ document.getElementById('add-jobs-btn').addEventListener('click', () => {
     swapPage('logged-in', 'new-post-page');
     localStorage.setItem('currPage', 'new-post-page');
     localStorage.setItem('prevPage', 'logged-in');
+});
 
-    // New post page submit button
-    document.getElementById('post-submit-btm').addEventListener('click', () => {
-        let data = {
-            title: document.getElementById('title').value,
-            image: document.getElementById('image').value,
-            start: document.getElementById('date').value,
-            description: document.getElementById('description').value
-        }
-        serviceCall(`/job`, data, 'POST');
-        alert("Job post added successfully");
-    })
-})
+// New post page submit button
+document.getElementById('post-submit-btm').addEventListener('click', () => {
+    let data = {
+        title: document.getElementById('title').value,
+        image: document.getElementById('image').value,
+        start: document.getElementById('date').value,
+        description: document.getElementById('description').value
+    }
+    serviceCall(`/job`, data, 'POST');
+    alert("Job post added successfully");
+});
 
 // New post page Cancel button
 document.getElementById('post-back-btm').addEventListener('click', () => {
@@ -660,7 +660,7 @@ document.getElementById('post-back-btm').addEventListener('click', () => {
     let curr = localStorage.getItem('prevPage')
     localStorage.setItem('prevPage', localStorage.getItem('currPage'));
     localStorage.setItem('currPage', curr);
-})
+});
 
 const updatePost = (job) => {
     const button = document.createElement('button');
