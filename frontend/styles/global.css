@@ -134,6 +134,11 @@ h4 {
     height: 100px
 }
 
+.profile-selected {
+    width: 100px;
+    height: 100px
+}
+
 .infoBox {
     position: relative;
     min-width: 400px;
