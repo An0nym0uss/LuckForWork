@@ -14,6 +14,12 @@ const swapPage = (currPage, newPage) => {
     document.getElementById(newPage).classList.remove('hide');
 }
 
+const showPage = (newPage) => {
+    swapPage('account-page', newPage);
+    swapPage('profile-page', newPage);
+    swapPage('logged-in', newPage);
+}
+
 const displayHomePage = () => {
     swapPage('logged-out', 'logged-in');
     feedJobs();
@@ -95,6 +101,8 @@ document.getElementById('login-button').addEventListener('click', () => {
 
 document.getElementById('to-register-page').addEventListener('click', () => {
     swapPage('login-page', 'register-page');
+    localStorage.setItem('currPage', 'register-page');
+    localStorage.setItem('prevPage', 'login-page');
 });
 
 // -------------------- register page --------------------
@@ -134,6 +142,8 @@ document.getElementById('register-button').addEventListener('click', () => {
 
 document.getElementById('to-login-page').addEventListener('click', () => {
     swapPage('register-page', 'login-page');
+    localStorage.setItem('currPage', 'login-page');
+    localStorage.setItem('prevPage', 'register-page');
 });
 
 // -------------------- home page --------------------
@@ -149,6 +159,8 @@ document.getElementById('logout-button').addEventListener('click', () => {
     start = 0;
 
     swapPage('logged-in', 'logged-out');
+    localStorage.setItem('currPage', 'logged-out');
+    localStorage.setItem('prevPage', 'logged-in');
 })
 
 document.getElementById('profile-button').addEventListener('click', () => {
@@ -218,6 +230,15 @@ const jobBlock = (job, user) => {
     const jobDiv = document.createElement('div');
     jobDiv.classList.add('job-container');
 
+    // Update post
+    if (job.creatorId == localStorage.getItem('userId')) {
+
+        const updateDiv= document.createElement('div');
+        updateDiv.appendChild(updatePost(job));
+        updateDiv.appendChild(deletePost(job));
+        jobDiv.appendChild(updateDiv);
+    }
+
     // image
     const img = document.createElement('img');
     img.src = job.image;
@@ -239,7 +260,7 @@ const jobBlock = (job, user) => {
     createrName.style.textDecoration = 'underline';
     createrName.innerText = `${user} `;
     createrName.id = `user-profile`;
-    userProfile(createrName, job.creatorId);
+    accessProfile(createrName, job.creatorId);
     creatorInfo.appendChild(createrName);
     
     const creatorTime = document.createElement('span');
@@ -386,77 +407,93 @@ const showComments = (id, comments, jobId) => {
     return commentsSpan;
 }
 // -------------------- user --------------------
-const userProfile = (element, id) => {
+const accessProfile = (element, id) => {
     element.addEventListener('click', () => {
-        swapPage('logged-in', 'profile-page');
-        serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
-            console.log(user)
-            const userDiv = document.createElement('div');
-
-            const profileTitle = document.createElement('h1');
-            profileTitle.innerText = `${user.name}'s profile`
-            userDiv.appendChild(profileTitle);
-
-            let data;
-            serviceCall(`/user?userId=${id}`, {}, 'GET').then(target => {
-                const mail = target.email;
-                const watchButton = document.createElement('button');
-                if (user.watcheeUserIds.includes(localStorage.getItem('userId'))) {
-                    watchButton.innerText = "Watch";
-                    data = {email: mail, turnon: true};
-                } else {
-                    watchButton.innerText = "Unwatch";
-                    data = {email: mail, turnon: false};
-                }
-                watchButton.addEventListener('click', ()=> {
-                    console.log(data);
-                    serviceCall(`/user/watch`, data, 'PUT');
-                })
-                userDiv.appendChild(watchButton);
-            })
-
-            const profilePicture = document.createElement('img');
-            profilePicture.src = user.image;
-            userDiv.appendChild(profilePicture);
-
-            const userName = document.createElement('div');
-            userName.innerText = `Name: ${user.name}`;
-            const userEmail = document.createElement('div');
-            userEmail.innerText = `Email: ${user.email}`;
-            userDiv.appendChild(userName);
-            userDiv.appendChild(userEmail);
-
-            const text1 = document.createElement('div');
-            text1.innerText = `${user.name}'s job post:`;
-            userDiv.appendChild(text1);
-            for (const job of user.jobs) {
-                userDiv.appendChild(jobBlock(job, user.name));
-            }
-
-            const text2 = document.createElement('div');
-            text2.innerText = `${user.name} is watched by:`;
-            userDiv.appendChild(text2);
-            for (const watchee of user.watcheeUserIds) {
-                serviceCall(`/user?userId=${watchee}`, {}, 'GET')
-                    .then(watchee => {
-                        const watcheeName = document.createElement('div');
-                        watcheeName.innerText = `${watchee.name}`;
-                        userDiv.appendChild(watcheeName);
-                    });
-            }
-            document.getElementById('userInfo').appendChild(userDiv);
-        })
-    });
+        if (localStorage.getItem('userId') == id) {
+            myProfile(id);
+        } else {
+            userProfile(id);
+        }
+    })
 }
+const userProfile = (id) => {
 
-const myProfile = (id) => {
-    swapPage('logged-in', 'profile-page');
+    swapPage(localStorage.getItem('currPage'), 'profile-page');
+    localStorage.setItem('prevPage', localStorage.getItem('currPage'));
+    localStorage.setItem('currPage', 'profile-page');
+
     serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
         console.log(user)
         const userDiv = document.createElement('div');
 
         const profileTitle = document.createElement('h1');
         profileTitle.innerText = `${user.name}'s profile`
+        userDiv.appendChild(profileTitle);
+
+        let data;
+        serviceCall(`/user?userId=${id}`, {}, 'GET').then(target => {
+            const mail = target.email;
+            const watchButton = document.createElement('button');
+            if (user.watcheeUserIds.includes(localStorage.getItem('userId'))) {
+                watchButton.innerText = "Watch";
+                data = {email: mail, turnon: true};
+            } else {
+                watchButton.innerText = "Unwatch";
+                data = {email: mail, turnon: false};
+            }
+            watchButton.addEventListener('click', ()=> {
+                console.log(data);
+                serviceCall(`/user/watch`, data, 'PUT');
+            })
+            userDiv.appendChild(watchButton);
+        })
+
+        const profilePicture = document.createElement('img');
+        profilePicture.src = user.image;
+        userDiv.appendChild(profilePicture);
+
+        const userName = document.createElement('div');
+        userName.innerText = `Name: ${user.name}`;
+        const userEmail = document.createElement('div');
+        userEmail.innerText = `Email: ${user.email}`;
+        userDiv.appendChild(userName);
+        userDiv.appendChild(userEmail);
+
+        const text1 = document.createElement('div');
+        text1.innerText = `${user.name}'s job post:`;
+        userDiv.appendChild(text1);
+        for (const job of user.jobs) {
+            userDiv.appendChild(jobBlock(job, user.name));
+        }
+
+        const text2 = document.createElement('div');
+        text2.innerText = `${user.name} is watched by:`;
+        userDiv.appendChild(text2);
+        for (const watchee of user.watcheeUserIds) {
+            serviceCall(`/user?userId=${watchee}`, {}, 'GET')
+                .then(watchee => {
+                    const watcheeName = document.createElement('div');
+                    watcheeName.innerText = `${watchee.name}`;
+                    userDiv.appendChild(watcheeName);
+                });
+        }
+        document.getElementById('userInfo').appendChild(userDiv);
+    })
+}
+
+
+const myProfile = (id) => {
+    
+    swapPage('logged-in', 'profile-page');
+    localStorage.setItem('currPage', 'profile-page');
+    localStorage.setItem('prevPage', 'logged-in');
+
+    serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
+        console.log(user)
+        const userDiv = document.createElement('div');
+
+        const profileTitle = document.createElement('h1');
+        profileTitle.innerText = `My profile`
         userDiv.appendChild(profileTitle);
 
         const modifyProfile = document.createElement('button');
@@ -501,6 +538,10 @@ const myProfile = (id) => {
 
 const changeInfo = (user) => {
     swapPage('profile-page', 'account-page');
+    localStorage.setItem('currPage', 'account-page');
+    localStorage.setItem('prevPage', 'profile-page');
+
+
     document.getElementById('newName').value=`${user.name}`;
     document.getElementById('newEmail').value=`${user.email}`;
 
@@ -525,26 +566,86 @@ const changeInfo = (user) => {
 
     document.getElementById('account-back').addEventListener('click', () => {
         swapPage('account-page', 'profile-page');
+        localStorage.setItem('currPage', 'account-page');
+        localStorage.setItem('prevPage', 'profile-page');
+
     })
 }
 // -------------------- Adding content--------------------
+// Home page create a new job button
 document.getElementById('add-jobs-btn').addEventListener('click', () => {
     swapPage('logged-in', 'new-post-page');
+    localStorage.setItem('currPage', 'new-post-page');
+    localStorage.setItem('prevPage', 'logged-in');
+
+    // New post page submit button
     document.getElementById('post-submit-btm').addEventListener('click', () => {
-        let data = {
-            title:document.getElementById('title').value,
-            image:document.getElementById('image').value,
-            start:document.getElementById('date').value,
-            description:document.getElementById('description').value
-        }
-        serviceCall(`/job`, data, 'POST');
-    })
+    let data = {
+        title:document.getElementById('title').value,
+        image:document.getElementById('image').value,
+        start:document.getElementById('date').value,
+        description:document.getElementById('description').value
+    }
+    serviceCall(`/job`, data, 'POST');
+    alert("Job post added successfully");
+})
 })
 
+// New post page Cancel button
+document.getElementById('post-back-btm').addEventListener('click', () => {
+    console.log('here?');
+    swapPage(localStorage.getItem('currPage'), localStorage.getItem('prevPage'));
+    let curr = localStorage.getItem('prevPage')
+    localStorage.setItem('prevPage', localStorage.getItem('currPage'));
+    localStorage.setItem('currPage', curr);
+})
 
+const updatePost = (job) => {
+
+    const button = document.createElement('button');
+    button.innerText = "Update";
+
+    // Job block update button
+    button.addEventListener('click', () => {
+        swapPage(localStorage.getItem('currPage'), "new-post-page");
+        localStorage.setItem('prevPage', localStorage.getItem('currPage'));
+        localStorage.setItem('currPage', 'new-post-page');
+
+        document.getElementById('title').value = job.title;
+        document.getElementById('date').value = job.start;
+        document.getElementById('description').value = job.description;
+        document.getElementById('post-submit-btm').textContent = 'update';
+
+        // Update post page update button
+        document.getElementById('post-submit-btm').addEventListener('click', () => {
+            let data = {
+                id: job.id,
+                title:document.getElementById('title').value,
+                image:document.getElementById('image').value,
+                start:document.getElementById('date').value,
+                description:document.getElementById('description').value
+            }
+            serviceCall(`/job`, data, 'PUT');
+            alert("Job post updated successfully");
+        })
+    })
+    return button;
+}
+
+const deletePost = (job) => {
+    const button = document.createElement('button');
+    button.innerText = "Delete";
+    // Job block delete button
+    button.addEventListener('click', () => {
+        serviceCall(`/job`, {id: job.id} , 'DELETE');
+        alert("Job post deleted successfully");
+    })
+    return button;
+}
 
 // -------------------- Main --------------------
 // Must be at the bottom
 if (localStorage.getItem('token')) {
     displayHomePage();
 }
+localStorage.setItem('token', res.token);
