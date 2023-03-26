@@ -605,7 +605,7 @@ document.getElementById('account-forward').addEventListener('click', () => {
 document.getElementById('profile-forward').addEventListener('click', () => {
     const newProfile = document.getElementById('newProfile').files[0];
     fileToDataUrl(newProfile).then(url => {
-        serviceCall(`/user`, {image: url}, 'PUT').then(res => {
+        serviceCall(`/user`, { image: url }, 'PUT').then(res => {
             alert("Profile changed successfully!")
         });
     });
@@ -640,19 +640,19 @@ document.getElementById('add-jobs-btn').addEventListener('click', () => {
     swapPage('logged-in', 'new-post-page');
     localStorage.setItem('currPage', 'new-post-page');
     localStorage.setItem('prevPage', 'logged-in');
+});
 
-    // New post page submit button
-    document.getElementById('post-submit-btm').addEventListener('click', () => {
-        let data = {
-            title: document.getElementById('title').value,
-            image: document.getElementById('image').value,
-            start: document.getElementById('date').value,
-            description: document.getElementById('description').value
-        }
-        serviceCall(`/job`, data, 'POST');
-        alert("Job post added successfully");
-    })
-})
+// New post page submit button
+document.getElementById('post-submit-btm').addEventListener('click', () => {
+    let data = {
+        title: document.getElementById('title').value,
+        image: document.getElementById('image').value,
+        start: document.getElementById('date').value,
+        description: document.getElementById('description').value
+    }
+    serviceCall(`/job`, data, 'POST');
+    alert("Job post added successfully");
+});
 
 // New post page Cancel button
 document.getElementById('post-back-btm').addEventListener('click', () => {
@@ -660,7 +660,7 @@ document.getElementById('post-back-btm').addEventListener('click', () => {
     let curr = localStorage.getItem('prevPage')
     localStorage.setItem('prevPage', localStorage.getItem('currPage'));
     localStorage.setItem('currPage', curr);
-})
+});
 
 const updatePost = (job) => {
     const button = document.createElement('button');
