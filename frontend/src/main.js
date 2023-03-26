@@ -194,17 +194,19 @@ document.getElementById('load-jobs-btn').addEventListener('click', () => {
 let shouldLoad = true;
 window.addEventListener('scroll', () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-        const jobsDiv = document.getElementById('jobs');
         if (shouldLoad) {
+            const loadMsg = document.getElementById('load-message');
+            while (loadMsg.firstChild) {
+                loadMsg.removeChild(loadMsg.lastChild);
+            }
             const loading = document.createElement('h2');
             loading.innerText = 'Loading...';
-            jobsDiv.appendChild(loading);
+            loadMsg.appendChild(loading);
 
-            const prev = start;
             shouldLoad = false;
             setTimeout(() => {
                 feedJobs();
-                jobsDiv.removeChild(loading);
+                loadMsg.removeChild(loading);
                 shouldLoad = true;
             }, 500);
         }
@@ -216,6 +218,10 @@ const feedJobs = () => {
     serviceCall(`/job/feed?start=${start}`, {}, 'GET')
         .then(jobs => {
             if (jobs.length === 0) {
+                const loadMsg = document.getElementById('load-message');
+                const reachesEnd = document.createElement('h2');
+                reachesEnd.innerText = 'You have reached the end.';
+                loadMsg.appendChild(reachesEnd);
                 window.scrollBy(0, -50);
             }
             start += jobs.length;
@@ -246,6 +252,7 @@ const jobBlock = (job, user) => {
     // image
     const img = document.createElement('img');
     img.src = job.image;
+    img.alt = "job image";
     jobDiv.appendChild(img);
 
     // title of job
@@ -441,6 +448,7 @@ const userProfile = (id) => {
     serviceCall(`/user?userId=${id}`, {}, 'GET').then(user => {
         console.log(user)
         const userDiv = document.createElement('div');
+        userDiv.classList.add('infoBox');
 
         const profileTitle = document.createElement('h1');
         profileTitle.innerText = `${user.name}'s profile`
@@ -471,6 +479,7 @@ const userProfile = (id) => {
 
         const profilePicture = document.createElement('img');
         profilePicture.src = user.image;
+        profilePicture.src = "profile image";
         profilePicture.classList.add('profile-picture');
         userDiv.appendChild(profilePicture);
 
@@ -533,6 +542,7 @@ const myProfile = (id) => {
 
         const profilePicture = document.createElement('img');
         profilePicture.src = user.image;
+        profilePicture.src = "profile image";
         profilePicture.classList.add('profile-picture');
         userDiv.appendChild(profilePicture);
 
