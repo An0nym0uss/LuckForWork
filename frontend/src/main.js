@@ -449,7 +449,14 @@ const userProfile = (id) => {
         let data;
         const mail = user.email;
         const watchButton = document.createElement('button');
-        if (user.watcheeUserIds.indexOf(localStorage.getItem('userId'))) {
+        
+        let toggle = false;
+        for (let i=0; i<user.watcheeUserIds.length; i++) {
+            if (user.watcheeUserIds[i] == localStorage.getItem('userId')) {
+                toggle = true;
+            }
+        }
+        if (toggle) {
             watchButton.innerText = "Unwatch";
             data = {email: mail, turnon: false};
         } else {
