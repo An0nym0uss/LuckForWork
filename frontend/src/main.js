@@ -574,6 +574,43 @@ const myProfile = (id) => {
     })
 }
 
+// Change personal info page confirm update password button
+document.getElementById('password-forward').addEventListener('click', () => {
+    let dataPass = {
+        password: document.getElementById('newPass').value,
+    }
+    serviceCall(`/user`, dataPass, 'PUT').then(res => {
+        alert("Password updated successfully!")
+    });
+})
+
+// Change personal info page confirm update name or email button
+document.getElementById('account-forward').addEventListener('click', () => {
+    const newEmail = document.getElementById('newEmail').value;
+    const newName = document.getElementById('newName').value;
+    let dataBasic = {
+        email: newEmail === user.email ? undefined : newEmail,
+        name: newName === user.name ? undefined : newName
+    }
+    if (dataBasic.email || dataBasic.name) {
+        serviceCall(`/user`, dataBasic, 'PUT').then(res => {
+            alert("Info updated successfully!")
+        });
+    } else {
+        errPopup("No change in name and email.");
+    }
+})
+
+// Change personal info page confirm update profile button
+document.getElementById('profile-forward').addEventListener('click', () => {
+    const newProfile = document.getElementById('newProfile').files[0];
+    fileToDataUrl(newProfile).then(url => {
+        serviceCall(`/user`, {image: url}, 'PUT').then(res => {
+            alert("Profile changed successfully!")
+        });
+    });
+})
+
 // Navigate to the change personal info page where user can change their information
 const changeInfo = (user) => {
     swapPage('profile-page', 'account-page');
@@ -592,43 +629,6 @@ const changeInfo = (user) => {
     img.alt = "profile image selected";
     img.classList.add("profile-selected");
     imgSpace.appendChild(img);
-
-    // Change personal info page confirm update password button
-    document.getElementById('password-forward').addEventListener('click', () => {
-        let dataPass = {
-            password: document.getElementById('newPass').value,
-        }
-        serviceCall(`/user`, dataPass, 'PUT').then(res => {
-            alert("Password updated successfully!")
-        });
-    })
-
-    // Change personal info page confirm update name or email button
-    document.getElementById('account-forward').addEventListener('click', () => {
-        const newEmail = document.getElementById('newEmail').value;
-        const newName = document.getElementById('newName').value;
-        let dataBasic = {
-            email: newEmail === user.email ? undefined : newEmail,
-            name: newName === user.name ? undefined : newName
-        }
-        if (dataBasic.email || dataBasic.name) {
-            serviceCall(`/user`, dataBasic, 'PUT').then(res => {
-                alert("Info updated successfully!")
-            });
-        } else {
-            errPopup("No change in name and email.");
-        }
-    })
-
-    // Change personal info page confirm update profile button
-    document.getElementById('profile-forward').addEventListener('click', () => {
-        const newProfile = document.getElementById('newProfile').files[0];
-        fileToDataUrl(newProfile).then(url => {
-            serviceCall(`/user`, {image: url}, 'PUT').then(res => {
-                alert("Profile changed successfully!")
-            });
-        });
-    })
 
     // Change personal info page go back button
     accessProfile(document.getElementById('account-back'), localStorage.getItem('userId'));
