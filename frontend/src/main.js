@@ -453,7 +453,7 @@ const toProfilePage = () => {
 const constructUserDiv = (userDiv, user) => {
     const profilePicture = document.createElement('img');
     profilePicture.src = user.image;
-    profilePicture.src = "profile image";
+    profilePicture.alt = "profile image";
     profilePicture.classList.add('profile-picture');
     userDiv.appendChild(profilePicture);
 
@@ -583,9 +583,15 @@ const changeInfo = (user) => {
     document.getElementById('newName').value = `${user.name}`;
     document.getElementById('newEmail').value = `${user.email}`;
 
+    const imgSpace = document.getElementById('profileSpace');
+    while (imgSpace.firstChild) {
+        imgSpace.removeChild(imgSpace.lastChild);
+    }
     const img = document.createElement('img');
     img.src = user.image;
-    document.getElementById('profileSpace').appendChild(img);
+    img.alt = "profile image selected";
+    img.classList.add("profile-selected");
+    imgSpace.appendChild(img);
 
     // Change personal info page confirm update password button
     document.getElementById('password-forward').addEventListener('click', () => {
@@ -616,21 +622,16 @@ const changeInfo = (user) => {
 
     // Change personal info page confirm update profile button
     document.getElementById('profile-forward').addEventListener('click', () => {
-        let dataProfile = {
-            image: document.getElementById('newProfile').value,
-        }
-        serviceCall(`/user`, dataProfile, 'PUT').then(res => {
-            alert("Profile changed successfully!")
+        const newProfile = document.getElementById('newProfile').files[0];
+        fileToDataUrl(newProfile).then(url => {
+            serviceCall(`/user`, {image: url}, 'PUT').then(res => {
+                alert("Profile changed successfully!")
+            });
         });
     })
 
     // Change personal info page go back button
-    document.getElementById('account-back').addEventListener('click', () => {
-        swapPage('account-page', 'profile-page');
-        localStorage.setItem('currPage', 'account-page');
-        localStorage.setItem('prevPage', 'profile-page');
-
-    })
+    accessProfile(document.getElementById('account-back'), localStorage.getItem('userId'));
 }
 
 // -------------------- Adding content--------------------
